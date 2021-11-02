@@ -3,6 +3,11 @@
 
 #include <string>
 
+/**
+ * @brief The DataPoint class
+ * Class to hold one data point. Maps a pressure to a time stamp.
+ * Probably could have used an actual map or something...
+ */
 class DataPoint {
 
 public:

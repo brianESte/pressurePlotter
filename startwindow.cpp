@@ -1,11 +1,9 @@
 #include "startwindow.h"
-//#include "ui_startwindow.h"
 #include "plotwindow.h"
 #include "/usr/local/include/qcustomplot/qcustomplot.h"
-#include <iostream>
+//#include <iostream>
 
-StartWindow::StartWindow(QWidget *parent) : QMainWindow(parent) /*, ui(new Ui::StartWindow)*/{
-    //ui->setupUi(this);
+StartWindow::StartWindow(QWidget *parent) : QMainWindow(parent){
     setObjectName("MainWindow_name");
     setWindowTitle("Pressure Plotter 1");
 
@@ -48,14 +46,21 @@ StartWindow::StartWindow(QWidget *parent) : QMainWindow(parent) /*, ui(new Ui::S
     central_widget->setLayout(main_layout);
     setCentralWidget(central_widget);
 
+    // connect each button to the appropriate function.
+    // connect(object pointer, action?, signal receiver, what to execute for that signal)
     connect(open_file_btn, &QAbstractButton::clicked, this, &StartWindow::open_file_dialog);
     connect(plot_btn, &QAbstractButton::clicked, this, &StartWindow::plot_data);
     connect(help_btn, &QAbstractButton::clicked, this, &StartWindow::help_window);
 }
 
-StartWindow::~StartWindow(){    /*delete ui;  */}
+// default destructor
+StartWindow::~StartWindow(){    }
 
-// return a float given a string of form #.#
+/**
+ * @brief StartWindow::str_to_pressure
+ * @param input_str Pressure as a string of form #.#
+ * @return          Pressure as a float
+ */
 float StartWindow::str_to_pressure(QString input_str){
     float pressure = input_str.at(0).digitValue();
     pressure += (float)(input_str.at(2).digitValue())/10.0;
@@ -63,10 +68,15 @@ float StartWindow::str_to_pressure(QString input_str){
 }
 
 // open file and process data in file
+/**
+ * @brief StartWindow::open_file_dialog
+ * Open the file dialog, then process the chosen file. If the target line ";DU20;NOSEN" is detected,
+ * process the data to the end of the file, storing it in a vector of data_points. Otherwise close the file
+ * And let the user know that the file was deemed invalid.
+ */
 void StartWindow::open_file_dialog(){
     filename = QFileDialog::getOpenFileName(this, "Open Data File");
-    // test filename: 20210511_123835_sn000518.txt
-    //filename = "../gui_test/A20210511_123835_sn000518.txt";
+    //filename = "sample_ch1.txt";
 
     QFile data_file(filename);
     if(!data_file.open(QIODevice::ReadOnly | QFile::Text)){
@@ -86,10 +96,12 @@ void StartWindow::open_file_dialog(){
     }
     if( !line_buffer.startsWith(";DU200;NOSEN")){
         QMessageBox::warning(this, "Warning", "No valid data found in file. If this was a valid data file, contact program creator for update");
+        data_file.close();
         return;
     }
     in.readLineInto(&line_buffer);
 
+    // is the pressure on pos 20 or 25?
     uint16_t pressure_start_pos;
     if(line_buffer[20] == '.'){
         pressure_start_pos = 25;
@@ -106,7 +118,8 @@ void StartWindow::open_file_dialog(){
 
     data_file.close();
 
-    // del middle values:
+    // delete redundant middle values:
+    // ie, given [8, 9, 7, 9, 9, 9, 9, 10] -> [8, 9, 7, 9, 9, 10]
     float first = data_points[0].pressure;
     float second = data_points[1].pressure;
     uint16_t data_len = data_points.size();
@@ -124,13 +137,16 @@ void StartWindow::open_file_dialog(){
         }
     }
 
-    // display filename on mainWindow
+    // display filename on startWindow
     f_status_label->setText(filename);
 }
 
-// create/run a PlotWindow when the plot button is clicked
+/**
+ * @brief StartWindow::plot_data
+ * create/run a PlotWindow when the plot button is clicked
+ */
 void StartWindow::plot_data(){
-    std::cout << "plot_data() called" << std::endl;
+    //std::cout << "plot_data() called" << std::endl;
     if(!data_points.size()){    return; }
 
     // grab the pressure limits from the spinboxes

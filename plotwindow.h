@@ -21,7 +21,6 @@ private slots:
       void axisLabelDoubleClick(QCPAxis* axis, QCPAxis::SelectablePart part);
 
 private:
-    //Ui::PlotWindow *ui_pw;
     QCustomPlot *customPlot;
     //QString title;
     float p_min;
