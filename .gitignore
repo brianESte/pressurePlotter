@@ -1,0 +1,24 @@
+
+# ignore bins / exes
+####################
+*.exe
+*.bin
+
+# ui files.
+####################
+ui_*
+*.ui
+
+# subdirectories
+####################
+/release
+/resources
+
+# Qt generated files
+####################
+*_import.cpp
+*.user
+*.pro
+.qmake.stash
+Makefile*
+
